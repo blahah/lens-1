@@ -92,10 +92,18 @@ var ContentEditor = React.createClass({
           $$('div', {className: "nodes"}, components)
         )
       ),
-      $$(BibliographyComponent, {
-        doc: doc,
-      })
+      this._renderBibliography()
     );
+  },
+
+  _renderBibliography: function() {
+    var doc = this.props.doc;
+    var bibliography = doc.getCollection('bib_item');
+    if (bibliography.getBibItems().length > 0) {
+      return $$(BibliographyComponent, {
+        doc: doc,
+      });
+    }
   },
 
   componentDidMount: function() {
