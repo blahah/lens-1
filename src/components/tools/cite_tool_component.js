@@ -5,40 +5,42 @@ var $$ = React.createElement;
 // CiteToolComponent
 // -------------
 
-class CiteToolComponent extends React.Component {
+var CiteToolComponent = React.createClass({
 
-  constructor(props) {
-    super(props);
+  displayName: "CiteToolComponent",
 
-    this.state = {
+  contextTypes: {
+    toolRegistry: React.PropTypes.object.isRequired,
+    app: React.PropTypes.object.isRequired
+  },
+
+  getInitialState: function() {
+    return {
       disabled: true
     };
+  },
 
-    this.onMouseDown = this.onMouseDown.bind(this);
-    this.onClick = this.onClick.bind(this);
-  }
-
-  componentWillMount() {
+  componentWillMount: function() {
     this.tool = this.context.toolRegistry.get("cite");
     if (!this.tool) {
-      throw new Error('No tool registered with name'+ toolName);
+      throw new Error('Cite tool not registered');
     }
     this.tool.connect(this, {
       'toolstate:changed': this.onToolstateChanged
     });
-  }
+  },
 
-  onToolstateChanged(toolState) {
+  onToolstateChanged: function(toolState) {
     this.setState({
       disabled: toolState.disabled
     });
-  }
+  },
 
-  onClick(e) {
+  onClick: function(e) {
     e.preventDefault();
-  }
+  },
 
-  onMouseDown(e) {
+  onMouseDown: function(e) {
     e.preventDefault();
     if (this.state.disabled) return;
 
@@ -49,13 +51,13 @@ class CiteToolComponent extends React.Component {
       citationType: this.props.citationType,
       citationId: citation.id
     });
-  }
+  },
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate: function(nextProps, nextState) {
     return this.state.disabled !== nextState.disabled;
-  }
+  },
 
-  render() {
+  render: function() {
     var classNames = [];
     if (this.props.classNames) classNames = this.props.classNames.slice();
     if (this.state.disabled) classNames.push('disabled');
@@ -66,15 +68,8 @@ class CiteToolComponent extends React.Component {
       onMouseDown: this.onMouseDown,
       onClick: this.onClick
     }, this.props.children);
-  }
-};
+  },
 
-
-CiteToolComponent.displayName = "CiteToolComponent";
-
-CiteToolComponent.contextTypes = {
-  toolRegistry: React.PropTypes.object.isRequired,
-  app: React.PropTypes.object.isRequired
-};
+});
 
 module.exports = CiteToolComponent;

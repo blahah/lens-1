@@ -3,8 +3,10 @@
 var TextProperty = require('substance-ui/text_property');
 var $$ = React.createElement;
 
-class HeadingComponent extends React.Component {
-  render() {
+var HeadingComponent = React.createClass({
+  displayName: "HeadingComponent",
+
+  render: function() {
     var level = this.props.node.level;
     return $$("div", { className: "content-node heading level-"+level, "data-id": this.props.node.id },
       $$(TextProperty, {
@@ -14,8 +16,6 @@ class HeadingComponent extends React.Component {
       })
     );
   }
-}
-
-HeadingComponent.displayName = "HeadingComponent";
+});
 
 module.exports = HeadingComponent;

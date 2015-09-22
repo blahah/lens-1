@@ -32,16 +32,21 @@ var stateHandlers = require('./state_handlers');
 //
 // Adjust for your own needs
 
-class ScienceWriter extends React.Component {
+var ScienceWriter = React.createClass({
 
-  constructor(props) {
-    super(props);
-    this.state = {
+  displayName: "ScienceWriter",
+
+  contextTypes: {
+    backend: React.PropTypes.object.isRequired
+  },
+
+  getInitialState: function() {
+    return {
       doc: null
     };
-  }
+  },
 
-  componentDidMount() {
+  componentDidMount: function() {
     var backend = this.context.backend;
     backend.getDocument(this.props.documentId || "example_document", function(err, doc) {
       // After here we won't allow non-transactional changes
@@ -50,9 +55,9 @@ class ScienceWriter extends React.Component {
         doc: doc
       });
     }.bind(this));
-  }
+  },
 
-  componentWillReceiveProps() {
+  componentWillReceiveProps: function() {
     var backend = this.context.backend;
     this.setState({
       doc: null
@@ -62,9 +67,9 @@ class ScienceWriter extends React.Component {
         doc: doc
       });
     }.bind(this));
-  }
+  },
 
-  render() {
+  render: function() {
     if (this.state.doc) {
       return $$(SubstanceWriter, {
         config: {
@@ -79,14 +84,7 @@ class ScienceWriter extends React.Component {
     } else {
       return $$('div', null, '');
     }
-  }
-}
-
-ScienceWriter.displayName = "ScienceWriter";
-
-ScienceWriter.contextTypes = {
-  backend: React.PropTypes.object.isRequired
-};
-
+  },
+});
 
 module.exports = ScienceWriter;

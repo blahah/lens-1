@@ -6,9 +6,6 @@ var Icon = require("substance-ui/font_awesome_icon");
 
 var Substance = require("substance");
 var Surface = Substance.Surface;
-var ContainerEditor = Surface.ContainerEditor;
-
-// var FormEditor = Surface.FormEditor;
 
 var ENABLED_TOOLS = ["strong", "emphasis", "comment"];
 
@@ -16,18 +13,29 @@ var CONTEXTS = [
   // {contextId: 'list', label: 'Upload figures', icon: 'fa-plus'}
 ];
 
-class ManageCollection extends React.Component {
-  constructor(props) {
-    super(props);
-  }
+var ManageCollection = React.createClass({
 
-  getChildContext() {
+
+  displayName: "ManageCollection",
+
+  contextTypes: {
+    app: React.PropTypes.object.isRequired,
+    componentRegistry: React.PropTypes.object.isRequired,
+    surfaceManager: React.PropTypes.object.isRequired
+  },
+
+  childContextTypes: {
+    // provided to editor components so that they know in which context they are
+    surface: React.PropTypes.object
+  },
+
+  getChildContext: function() {
     return {
       surface: this.surface
     };
-  }
+  },
 
-  stateFromAppState() {
+  stateFromAppState: function() {
     var app = this.context.app;
     var doc = this.context.app.doc;
     var itemType = app.state.modal.itemType;
@@ -38,14 +46,14 @@ class ManageCollection extends React.Component {
       collection: collection,
       items: collection.getItems()
     };
-  }
+  },
 
-  getPanelLabel() {
+  getPanelLabel: function() {
     var c = this.state.collection;
     return [this.state.items.length, c.labelPrefix+'s'].join(' ');
-  }
+  },
 
-  componentWillMount() {
+  componentWillMount: function() {
     this.stateFromAppState();
 
     var doc = this.context.app.doc;
@@ -55,9 +63,9 @@ class ManageCollection extends React.Component {
     };
 
     this.surface = new Surface(this.context.surfaceManager, doc, new Surface.FormEditor(), options);
-  }
+  },
 
-  componentDidMount() {
+  componentDidMount: function() {
     var surface = this.surface;
     var app = this.context.app;
     // push surface selection state so that we can recover it when closing
@@ -74,10 +82,9 @@ class ManageCollection extends React.Component {
     this.forceUpdate(function() {
       self.surface.rerenderDomSelection();
     });
-  }
+  },
 
-
-  componentDidUpdate() {
+  componentDidUpdate: function() {
     // HACK: when the state is changed this and particularly TextProperties
     // get rerendered (e.g., as the highlights might have changed)
     // Unfortunately we loose the DOM selection then.
@@ -87,9 +94,9 @@ class ManageCollection extends React.Component {
     setTimeout(function() {
       self.surface.rerenderDomSelection();
     });
-  }
+  },
 
-  componentWillUnmount() {
+  componentWillUnmount: function() {
     var app = this.context.app;
     var surface = this.surface;
     // remove the selection explicitly so that we don't have a tool
@@ -97,13 +104,13 @@ class ManageCollection extends React.Component {
     app.unregisterSurface(surface);
     surface.dispose();
     this.context.surfaceManager.popState();
-  }
+  },
 
-  handleItemDeletion(itemId) {
+  handleItemDeletion: function(itemId) {
     console.log('handling item deletion', itemId);
-  }
+  },
 
-  render() {
+  render: function() {
     var state = this.state;
     var doc = this.context.app.doc;
     var navItems = _.map(CONTEXTS, function(context) {
@@ -145,20 +152,7 @@ class ManageCollection extends React.Component {
       )
     );
   }
-}
-
-ManageCollection.displayName = "ManageCollection";
-
-ManageCollection.contextTypes = {
-  app: React.PropTypes.object.isRequired,
-  componentRegistry: React.PropTypes.object.isRequired,
-  surfaceManager: React.PropTypes.object.isRequired
-};
-
-ManageCollection.childContextTypes = {
-  // provided to editor components so that they know in which context they are
-  surface: React.PropTypes.object
-};
+});
 
 // Panel Configuration
 // -----------------

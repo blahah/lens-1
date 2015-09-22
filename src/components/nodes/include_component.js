@@ -1,11 +1,18 @@
 'use strict';
 
-var TextProperty = require('substance-ui/text_property');
 var $$ = React.createElement;
 var UnsupportedNode = require('./unsupported_node');
 
-class IncludeComponent extends React.Component {
-  render() {
+var IncludeComponent = React.createClass({
+
+  displayName: "IncludeComponent",
+
+  contextTypes: {
+    app: React.PropTypes.object.isRequired,
+    componentRegistry: React.PropTypes.object.isRequired
+  },
+
+  render: function() {
     var doc = this.props.doc;
     var node = doc.get(this.props.node.nodeId);
     var componentRegistry = this.context.componentRegistry;
@@ -14,7 +21,7 @@ class IncludeComponent extends React.Component {
 
     if (!ComponentClass) {
       console.error('Could not resolve a component for type: ' + node.type);
-      ComponentClass = UnsupporedNode;
+      ComponentClass = UnsupportedNode;
     }
 
     return $$(ComponentClass, {
@@ -23,13 +30,6 @@ class IncludeComponent extends React.Component {
       node: node
     });
   }
-}
-
-IncludeComponent.displayName = "IncludeComponent";
-
-IncludeComponent.contextTypes = {
-  app: React.PropTypes.object.isRequired,
-  componentRegistry: React.PropTypes.object.isRequired
-};
+});
 
 module.exports = IncludeComponent;

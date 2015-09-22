@@ -3,62 +3,67 @@ var $$ = React.createElement;
 var _ = require("substance/helpers");
 var Icon = require("substance-ui/font_awesome_icon");
 
-class CitePanel extends React.Component {
+var CitePanel = React.createClass({
 
-  constructor(props) {
-    super(props);
-  }
+  contextTypes: {
+    app: React.PropTypes.object.isRequired,
+    backend: React.PropTypes.object.isRequired,
+    toolRegistry: React.PropTypes.object.isRequired,
+    componentRegistry: React.PropTypes.object.isRequired
+  },
 
-  handleCancel(e) {
+  displayName: "CitePanel",
+
+  handleCancel: function(e) {
     var app = this.context.app;
     e.preventDefault();
 
     app.replaceState({
       contextId: "toc"
     });
-  }
+  },
 
-  getItems(citationType) {
+  getItems: function(citationType) {
     var doc = this.props.doc;
     var collection = doc.getCollection(citationType);
     return collection.getItems();
-  }
+  },
 
-  stateFromAppState() {
+  stateFromAppState: function() {
     var app = this.context.app;
     this.state = {
       citationType: app.state.citationType,
       items: this.getItems(app.state.citationType),
       citationId: app.state.citationId
     };
-  }
+  },
 
-  componentWillMount() {
+  componentWillMount: function() {
     this.stateFromAppState();
     this.tool = this.context.toolRegistry.get('cite');
     if (!this.tool) throw new Error('cite tool not found in registry');
-  }
+  },
 
-  componentWillReceiveProps() {
+  componentWillReceiveProps: function() {
     this.stateFromAppState();
-  }
+  },
 
-  componentWillUnmount() {
+  componentWillUnmount: function() {
     this.tool.disconnect(this);
-  }
+  },
 
   // Determines wheter an item is active
-  isItemActive(itemId) {
+  isItemActive: function(itemId) {
     if (!this.state.citationId) return false;
     var doc = this.props.doc;
     var citation = doc.get(this.state.citationId);
     return _.includes(citation.targets, itemId);
-  }
+  },
 
   // Rendering
   // -------------------
 
-  render() {
+  render: function() {
     var self = this;
     var componentRegistry = this.context.componentRegistry;
 
@@ -95,24 +100,15 @@ class CitePanel extends React.Component {
         )
       )
     );
-  }
+  },
 
   // Called with entityId when an entity has been clicked
-  handleSelection(targetId) {
+  handleSelection: function(targetId) {
     var citationId = this.state.citationId;
     this.tool.toggleTarget(citationId, targetId);
     this.forceUpdate();
-  }
-}
-
-CitePanel.contextTypes = {
-  app: React.PropTypes.object.isRequired,
-  backend: React.PropTypes.object.isRequired,
-  toolRegistry: React.PropTypes.object.isRequired,
-  componentRegistry: React.PropTypes.object.isRequired
-};
-
-CitePanel.displayName = "CitePanel";
+  },
+});
 
 // Panel configuration
 // ----------------

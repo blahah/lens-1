@@ -2,26 +2,26 @@
 
 var $$ = React.createElement;
 
-class CitationComponent extends React.Component {
+var CitationComponent = React.createClass({
 
-  constructor(props) {
-    super(props);
+  displayName: "CitationComponent",
 
-    this.onMouseDown = this.onMouseDown.bind(this);
-    this.onClick = this.onClick.bind(this);
-  }
+  contextTypes: {
+    surface: React.PropTypes.object.isRequired,
+    app: React.PropTypes.object.isRequired
+  },
 
-  componentDidMount() {
+  componentDidMount: function() {
     this.props.node.connect(this, {
       "label:changed": this.onLabelChanged
     });
-  }
+  },
 
-  componentWillUnmount() {
+  componentWillUnmount: function() {
     this.props.node.disconnect(this);
-  }
+  },
 
-  render() {
+  render: function() {
     return $$('span', {
       className: this.getClassName(),
       "data-id": this.props.node.id,
@@ -30,39 +30,33 @@ class CitationComponent extends React.Component {
       onClick: this.onClick,
       onMouseDown: this.onMouseDown
     }, this.props.node.label || "");
-  }
+  },
 
-  onMouseDown(e) {
+  onMouseDown: function(e) {
     e.preventDefault();
     var citation = this.props.node;
     var surface = this.context.surface;
 
     surface.setSelection(citation.getSelection());
     surface.rerenderDomSelection();
-  }
+  },
 
-  onClick(e) {
+  onClick: function(e) {
     e.preventDefault();
     e.stopPropagation();
-  }
+  },
 
-  onLabelChanged() {
+  onLabelChanged: function() {
     this.forceUpdate();
-  }
+  },
 
-  getClassName() {
+  getClassName: function() {
     var classNames = this.props.node.getClassNames();
     if (this.props.classNames) {
       classNames += " " + this.props.classNames.join(' ');
     }
     return classNames.replace(/_/g, '-');
-  }
-}
-
-CitationComponent.displayName = "CitationComponent";
-CitationComponent.contextTypes = {
-  surface: React.PropTypes.object.isRequired,
-  app: React.PropTypes.object.isRequired
-};
+  },
+});
 
 module.exports = CitationComponent;

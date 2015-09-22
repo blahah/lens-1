@@ -8,19 +8,21 @@ var TableSelection = Substance.Document.TableSelection;
 
 // var NO_RECT = { start: { row: -1, col: -1 }, end: { row: -1, col: -1 } };
 
-class TableComponent extends React.Component {
+var TableComponent = React.createClass({
 
-  constructor(props) {
-    super(props);
-    this.state = {
+  displayName: "TableComponent",
+
+  contextTypes: {
+    surface: React.PropTypes.object.isRequired
+  },
+
+  getInitialState: function() {
+    return {
       mode: 'table'
     };
+  },
 
-    this.onDoubleClick = _.bind(this.onDoubleClick, this);
-    this.onMouseDown = _.bind(this.onMouseDown, this);
-  }
-
-  componentDidMount() {
+  componentDidMount: function() {
     this.context.surface.connect(this, {
       "selection:changed": this.onSelectionChange
     });
@@ -30,13 +32,13 @@ class TableComponent extends React.Component {
     //   e.preventDefault();
     // });
     $(el).on('mousedown', 'th,td', this.onMouseDown);
-  }
+  },
 
-  componentWillUnmount() {
+  componentWillUnmount: function() {
     this.context.surface.disconnect(this);
-  }
+  },
 
-  render() {
+  render: function() {
     var tableNode = this.props.node;
     // HACK: make sure row col indexes are up2date
     tableNode.getMatrix();
@@ -64,9 +66,9 @@ class TableComponent extends React.Component {
       contentEditable: false
     };
     return $$("table", tableProps, secEls);
-  }
+  },
 
-  _renderRow(row) {
+  _renderRow: function(row) {
     var doc = this.props.doc;
     var cellEls = [];
 
@@ -99,9 +101,9 @@ class TableComponent extends React.Component {
     }, this);
 
     return $$("tr", {key: row.id, "data-id": row.id, contentEditable:false}, cellEls);
-  }
+  },
 
-  onDoubleClick(e) {
+  onDoubleClick: function(e) {
     e.preventDefault();
     e.stopPropagation();
     var surface = this.context.surface;
@@ -123,9 +125,9 @@ class TableComponent extends React.Component {
         startOffset: text.length,
       });
     });
-  }
+  },
 
-  onMouseDown(e) {
+  onMouseDown: function(e) {
     var el = React.findDOMNode(this);
     var $el = $(el);
     var surface = this.context.surface;
@@ -171,9 +173,9 @@ class TableComponent extends React.Component {
       });
       surface.setSelection(tableSelection);
     });
-  }
+  },
 
-  onSelectionChange(sel) {
+  onSelectionChange: function(sel) {
     var node = this.props.node;
     var id = node.id;
     if (this.hasSelection) {
@@ -195,9 +197,9 @@ class TableComponent extends React.Component {
         this._updateSelection(sel.rectangle);
       }
     }
-  }
+  },
 
-  _updateSelection(rectangle) {
+  _updateSelection: function(rectangle) {
     var el = React.findDOMNode(this);
     var $el = $(el);
     var $cells = $el.find('th,td');
@@ -213,22 +215,16 @@ class TableComponent extends React.Component {
       }
     });
     this.hasSelection = true;
-  }
+  },
 
-  _clearSelection() {
+  _clearSelection: function() {
     var el = React.findDOMNode(this);
     var $el = $(el);
     var $cells = $el.find('th,td');
     $cells.removeClass('selected');
     this.hasSelection = false;
-  }
+  },
 
-}
-
-TableComponent.displayName = "TableComponent";
-
-TableComponent.contextTypes = {
-  surface: React.PropTypes.object.isRequired
-};
+});
 
 module.exports = TableComponent;

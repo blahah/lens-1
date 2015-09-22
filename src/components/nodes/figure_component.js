@@ -3,8 +3,15 @@
 var TextProperty = require('substance-ui/text_property');
 var $$ = React.createElement;
 
-class FigureComponent extends React.Component {
-  render() {
+var FigureComponent = React.createClass({
+
+  displayName: "FigureComponent",
+
+  contextTypes: {
+    componentRegistry: React.PropTypes.object.isRequired
+  },
+
+  render: function() {
     var componentRegistry = this.context.componentRegistry;
     var contentNode = this.props.node.getContentNode();
     var ContentComponentClass = componentRegistry.get(contentNode.type);
@@ -41,12 +48,6 @@ class FigureComponent extends React.Component {
       )
     );
   }
-}
-
-FigureComponent.displayName = "FigureComponent";
-
-FigureComponent.contextTypes = {
-  componentRegistry: React.PropTypes.object.isRequired
-};
+});
 
 module.exports = FigureComponent;
