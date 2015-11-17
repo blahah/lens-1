@@ -228,7 +228,7 @@ LensWriter.Prototype = function() {
               return Promise.reject('not found')
             }
           }).catch(function (reason) {
-            return fetch('http://cors.io/?u=http://dx.doi.org/' + result.DOI).then(function (response) {
+            return fetch('http://dx.doi.org/' + result.DOI).then(function (response) {
               return response.text().then(function (text) {
                 localforage.setItem(result.DOI, text)
                 return { text: text }
