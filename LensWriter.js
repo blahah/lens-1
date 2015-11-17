@@ -14,6 +14,7 @@ var docHelpers = require('substance/model/documentHelpers');
 var Component = require('substance/ui/Component');
 var _ =  require('lodash');
 var localforage = require('localforage');
+var $ = require('substance/util/jquery');
 var $$ = Component.$$;
 
 
@@ -194,13 +195,18 @@ LensWriter.Prototype = function() {
   this.didMount = function() {
     var doc = this.props.doc;
     doc.connect(this, {
-      'document:changed': this.onDocumentChange,
+      'document:changed': _.throttle(this.onDocumentChange.bind(this), 1000),
     });
   },
 
   this.dispose = function() {
     this.props.doc.disconnect(this);
   },
+
+  // this.onDocumentChangeThrottled = function(change) {
+  //   var throttled = _.throttle(this.onDocumentChange.bind(this), 2000)
+  //   throttled(change)
+  // }
 
   this.onDocumentChange = function(change) {
     var doc = this.props.doc;
@@ -210,7 +216,7 @@ LensWriter.Prototype = function() {
       var plainText = doc.get(op.path);
       var pos = op.diff.pos;
       var head = plainText.slice(0, pos+1);
-      var query = head.split(' ').slice(-3);
+      var query = head.replace(/\W+/g, ' ').trim().split(' ').slice(-2).join(' ');
       this.queryCrossRef(query).then(function (results) {
         // Get full text
         Promise.all(results.map(function (result) {
@@ -222,7 +228,7 @@ LensWriter.Prototype = function() {
               return Promise.reject('not found')
             }
           }).catch(function (reason) {
-            return fetch('http://dx.doi.org/' + result.DOI).then(function (response) {
+            return fetch('http://cors.io/?u=http://dx.doi.org/' + result.DOI).then(function (response) {
               return response.text().then(function (text) {
                 localforage.setItem(result.DOI, text)
                 return { text: text }
@@ -233,16 +239,26 @@ LensWriter.Prototype = function() {
           // Combine with fulltext
           results = _.merge(results, texts)
           results = _.map(results, function (result) {
-            result.match =  result.text.match(new RegExp('.*' + query[2] + '.*'))
+            // Load text by parsing HTML with jQuery, strip images
+            var text = $($.parseHTML(result.text.replace(/<img[^>]*>/g,''))).text();
+            var matches = text.match(new RegExp('[^\n]{0,20}' + query + '[^\n]{0,20}', 'gi'))
+
+            if(matches) {
+              console.log('Found matches:', matches)
+              result.matches = matches
+            } else {
+              result.matches = []
+            }
             return result
           })
-
-          this.setState({
-            contextId: 'smart-references',
-            results: results,
-            op: op,
-            query: query
-          })
+          if(results.length > 0) {
+            this.setState({
+              contextId: 'smart-references',
+              results: results,
+              op: op,
+              query: query
+            })
+          }
         }.bind(this))
       }.bind(this))
 
@@ -252,12 +268,24 @@ LensWriter.Prototype = function() {
   }
 
   this.queryCrossRef = function (query) {
-    return fetch(
-      'http://api.crossref.org/works?query=' + query +
-      '&filter=type:journal-article,license.url:http://creativecommons.org/licenses/by/3.0/deed.en_US'
-    ).then(function (response) {
-      return response.json().then(function (data) {
-        return data.message.items;
+    return localforage.getItem('CROSSREF:' + query).then(function (items) {
+      if(items) {
+        console.log('Cached from CrossRef: ', query)
+        return Promise.resolve(items)
+      } else {
+        console.log('Not in cache: ', query)
+        return Promise.reject('not found')
+      }
+    }).catch(function (reason) {
+      return fetch(
+        'http://api.crossref.org/works?query=' + query +
+        '&filter=type:journal-article,license.url:http://creativecommons.org/licenses/by/3.0/deed.en_US'
+      ).then(function (response) {
+        return response.json().then(function (data) {
+          var items = data.message.items;
+          localforage.setItem('CROSSREF:' + query, items)
+          return items;
+        })
       })
     })
   }

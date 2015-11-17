@@ -14,16 +14,27 @@ SmartReferenceItem.Prototype = function() {
       .addClass('bib-item border-bottom pad item small clearfix')
       .attr('data-id', this.props.node.DOI);
 
-    el.on('click', this.onClick);
-    el.on('mousedown', this.onMouseDown);
     if (this.props.active) {
       el.addClass('active');
     }
 
-    el.append($$('div').addClass('label').append(this.props.node.DOI));
+    el.append($$('div').addClass('label').append(
+      $$('a').attr('href', 'http://dx.doi.org/' + this.props.node.DOI).
+        attr('target', '_blank').
+        append(this.props.node.DOI)
+      )
+    );
 
-    el.append($$('div').addClass('text').append(this.props.node.title[0]));
-    el.append($$('div').addClass('text').append(this.props.node.match));
+    var clickable = $$('div').addClass('text').append(this.props.node.title[0]);
+    clickable.on('click', this.onClick);
+    clickable.on('mousedown', this.onMouseDown);
+    el.append(clickable)
+
+    var items = this.props.node.matches.map(function (match) {
+      return $$('div').addClass('snippet').append('...' + match + '...');
+    }.bind(this))
+
+    el.append($$('div').append(items));
     return el;
   };
 

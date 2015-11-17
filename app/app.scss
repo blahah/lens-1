@@ -16,7 +16,7 @@ body,html {
   right: 0px;
   height: 40px;
   background: #5c6570;
-  
+
   button {
     color: rgba(255,255,255,0.6);
     display: block;
@@ -42,4 +42,9 @@ body,html {
   left: 0px;
   right: 0px;
   top: 40px;
+}
+
+.snippet {
+  font-size: 80%;
+  color: #999;
 }

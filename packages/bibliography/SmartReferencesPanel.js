@@ -6,6 +6,7 @@ var Component = require('substance/ui/Component');
 var Panel = require('substance/ui/Panel');
 var Icon = require("substance/ui/FontAwesomeIcon");
 var SmartReferenceItem = require("./SmartReferenceItem")
+var insertCitation = require('../citations/insertCitation');
 var uuid = require('substance/util/uuid');
 
 var $$ = Component.$$;
@@ -34,7 +35,7 @@ SmartReferencesPanel.Prototype = function() {
         $$('div').addClass('label').append(this.i18n.t("choose_referenced_items"))
       ),
       $$('div').addClass("panel-content").ref('panelContent').append(
-        $$('div').addClass("bib-items border-bottom pad item small clearfix").append('Searched for: ' + this.props.query.join(' ') + '. ' + this.props.results.length + ' papers.'),
+        $$('div').addClass("bib-items border-bottom pad item small clearfix").append('Searched for: ' + this.props.query + '. ' + this.props.results.length + ' papers.'),
         $$('div').addClass("bib-items").append(
           items
         )
@@ -88,7 +89,6 @@ SmartReferencesPanel.Prototype = function() {
 
   // Called with a new bibliography entry
   this.handleSelection = function(bib) {
-    var bibId = uuid('bib')
     var surface = this.getController().getSurface()
     var op = this.props.op
 
@@ -98,29 +98,27 @@ SmartReferencesPanel.Prototype = function() {
       return response.json()
     }).then(function (data) {
       surface.transaction(function(tx, args) {
-
-        var bibItem = {
-          id: bibId,
-          type: "bib-item",
-          source: JSON.stringify(data),
-          format: 'citeproc'
-        };
-        tx.create(bibItem);
-
-        // args.text = '$';
-        // surface.insertText(tx, args);
-
-        tx.create({
-          id: uuid('bib'),
-          'type': 'bib-item-citation',
-          'targets': [bibItem.id],
-          'path': op.path,
-          'startOffset': args.selection.startOffset,
-          'endOffset': args.selection.startOffset + 1,
-        })
-      })
-    })
+        var bibId = this.createBibItemIfNotExists(tx, data)
+        return insertCitation(tx, args.selection, 'bib-item-citation', [bibId]);
+      }.bind(this))
+    }.bind(this))
   };
+
+  this.createBibItemIfNotExists = function(tx, data) {
+    var foundBibId = Object.keys(this.props.doc.bibItemByGuidIndex.get(data.DOI))[0]
+    if(foundBibId) {
+      return foundBibId
+    } else {
+      var bibItem = {
+        id: uuid('bib'),
+        type: 'bib-item',
+        source: JSON.stringify(data),
+        format: 'citeproc'
+      };
+      tx.create(bibItem)
+      return bibItem.id
+    }
+  }
 };
 
 oo.inherit(SmartReferencesPanel, Panel);
