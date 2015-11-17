@@ -279,7 +279,7 @@ LensWriter.Prototype = function() {
     }).catch(function (reason) {
       return fetch(
         'http://api.crossref.org/works?query=' + query +
-        '&filter=type:journal-article,license.url:http://creativecommons.org/licenses/by/3.0/deed.en_US'
+        '&filter=type:journal-article'
       ).then(function (response) {
         return response.json().then(function (data) {
           var items = data.message.items;
