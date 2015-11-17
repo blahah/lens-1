@@ -253,7 +253,7 @@ LensWriter.Prototype = function() {
             }
             return result
           })
-          if(results.length > 0 && queryTime > this.state.queryTime) {
+          if(results.length > 0 && (!this.state.queryTime || queryTime > this.state.queryTime)) {
 
             this.setState({
               contextId: 'smart-references',
