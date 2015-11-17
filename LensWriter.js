@@ -217,6 +217,8 @@ LensWriter.Prototype = function() {
       var pos = op.diff.pos;
       var head = plainText.slice(0, pos+1);
       var query = head.replace(/\W+/g, ' ').trim().split(' ').slice(-2).join(' ');
+      var queryTime = Date.now()
+
       this.queryCrossRef(query).then(function (results) {
         // Get full text
         Promise.all(results.map(function (result) {
@@ -251,12 +253,14 @@ LensWriter.Prototype = function() {
             }
             return result
           })
-          if(results.length > 0) {
+          if(results.length > 0 && queryTime > this.state.queryTime) {
+
             this.setState({
               contextId: 'smart-references',
               results: results,
               op: op,
-              query: query
+              query: query,
+              queryTime: queryTime
             })
           }
         }.bind(this))
