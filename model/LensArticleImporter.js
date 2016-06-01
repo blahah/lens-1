@@ -13,7 +13,7 @@ var converters = [
   require('substance/packages/strong/StrongHTMLConverter'),
   require('substance/packages/emphasis/EmphasisHTMLConverter'),
   require('substance/packages/link/LinkHTMLConverter'),
-
+  require('substance/packages/embed/EmbedHTMLConverter'),
   // Lens-specific converters
   require('../packages/metadata/MetadataXMLConverter'),
   require('../packages/bibliography/BibItemXMLConverter'),
